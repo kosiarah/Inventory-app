@@ -23,10 +23,11 @@ jobs:
       pull-requests: write
       issues: write
       id-token: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: anthropics/claude-code-action@beta
+      - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
