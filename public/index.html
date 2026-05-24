@@ -5,26 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventory Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f0f0f;
-      --surface: #161616;
-      --surface-2: #1e1e1e;
-      --border: #2a2a2a;
-      --border-light: #333;
-      --text: #e8e8e8;
-      --text-muted: #888;
-      --text-dim: #555;
-      --accent: #f0c040;
-      --accent-dim: #b89020;
-      --green: #4caf78;
-      --red: #e05a5a;
-      --blue: #5a9ee0;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
+      --bg:          #0c0d13;
+      --surface:     #13151f;
+      --surface-2:   #1a1d2e;
+      --surface-3:   #222640;
+      --border:      #272b42;
+      --border-mid:  #333858;
+      --text:        #dde3f0;
+      --text-muted:  #7a82a6;
+      --text-dim:    #424870;
+      --accent:      #6366f1;
+      --accent-h:    #7c7ff5;
+      --accent-bg:   rgba(99,102,241,0.12);
+      --green:       #22c55e;
+      --green-bg:    rgba(34,197,94,0.10);
+      --red:         #ef4444;
+      --red-bg:      rgba(239,68,68,0.10);
+      --amber:       #f59e0b;
+      --amber-bg:    rgba(245,158,11,0.10);
+      --blue:        #38bdf8;
+      --radius:      6px;
+      --radius-sm:   4px;
+      --mono:        'JetBrains Mono', monospace;
+      --sans:        'Inter', sans-serif;
+      --shadow:      0 4px 24px rgba(0,0,0,0.5);
+      --shadow-sm:   0 2px 8px rgba(0,0,0,0.4);
     }
 
     body {
@@ -33,171 +43,295 @@
       font-family: var(--sans);
       font-size: 14px;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
     /* ── HEADER ── */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 0 32px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 56px;
+      height: 54px;
       position: sticky;
       top: 0;
       z-index: 100;
+      backdrop-filter: blur(8px);
     }
 
     .logo {
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .logo span {
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text span {
       color: var(--text-muted);
       font-weight: 400;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.03em;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
     }
 
     /* ── STATS BAR ── */
     .stats-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       border-bottom: 1px solid var(--border);
+      background: var(--surface);
     }
 
     .stat-card {
-      padding: 20px 32px;
+      padding: 18px 24px;
       border-right: 1px solid var(--border);
       transition: background 0.15s;
+      position: relative;
+      overflow: hidden;
     }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .stat-card:nth-child(1)::before { background: var(--accent); }
+    .stat-card:nth-child(2)::before { background: var(--blue); }
+    .stat-card:nth-child(3)::before { background: var(--green); }
+    .stat-card:nth-child(4)::before { background: var(--text-muted); }
+    .stat-card:nth-child(5)::before { background: var(--amber); }
 
     .stat-card:last-child { border-right: none; }
 
     .stat-label {
-      font-family: var(--mono);
       font-size: 10px;
-      letter-spacing: 0.15em;
+      font-weight: 600;
+      letter-spacing: 0.10em;
       text-transform: uppercase;
       color: var(--text-dim);
-      margin-bottom: 6px;
+      margin-bottom: 10px;
     }
 
     .stat-value {
       font-family: var(--mono);
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 600;
       color: var(--text);
+      line-height: 1;
     }
 
-    .stat-value.accent { color: var(--accent); }
-    .stat-value.green { color: var(--green); }
+    .stat-value.c-accent { color: var(--accent); }
+    .stat-value.c-blue   { color: var(--blue); }
+    .stat-value.c-green  { color: var(--green); }
+    .stat-value.c-amber  { color: var(--amber); }
 
     /* ── MAIN LAYOUT ── */
     .main {
       display: grid;
       grid-template-columns: 1fr 340px;
-      min-height: calc(100vh - 56px - 65px);
+      min-height: calc(100vh - 54px - 68px);
     }
 
-    /* ── TABLE SECTION ── */
-    .table-section {
+    /* ── CONTENT AREA ── */
+    .content-area {
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
+    /* ── TOOLBAR ── */
     .toolbar {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 16px 24px;
+      gap: 8px;
+      padding: 12px 20px;
       border-bottom: 1px solid var(--border);
       background: var(--surface);
+      flex-wrap: wrap;
     }
 
     .search-wrap {
       position: relative;
       flex: 1;
+      min-width: 180px;
     }
 
     .search-icon {
       position: absolute;
-      left: 12px;
+      left: 11px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-dim);
-      font-size: 13px;
+      font-size: 14px;
       pointer-events: none;
+      line-height: 1;
     }
 
-    input[type="text"], input[type="number"], select {
+    input[type="text"],
+    input[type="number"],
+    select {
       background: var(--bg);
       border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       color: var(--text);
       font-family: var(--sans);
       font-size: 13px;
-      padding: 8px 12px;
+      padding: 7px 11px;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-bg);
     }
 
     .search-input {
       width: 100%;
-      padding-left: 34px;
+      padding-left: 32px;
     }
 
-    select {
-      cursor: pointer;
+    select { cursor: pointer; }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      flex-shrink: 0;
     }
 
+    .item-count {
+      font-size: 12px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      padding: 0 4px;
+    }
+
+    /* ── BUTTONS ── */
     .btn {
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 8px 16px;
-      border: 1px solid;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
       cursor: pointer;
       transition: all 0.15s;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      line-height: 1;
     }
 
     .btn-primary {
       background: var(--accent);
       border-color: var(--accent);
-      color: #000;
+      color: #fff;
     }
-
-    .btn-primary:hover { background: #ffd060; border-color: #ffd060; }
+    .btn-primary:hover { background: var(--accent-h); border-color: var(--accent-h); }
 
     .btn-ghost {
       background: transparent;
-      border-color: var(--border-light);
+      border-color: var(--border-mid);
       color: var(--text-muted);
     }
-
-    .btn-ghost:hover {
-      border-color: var(--text-muted);
-      color: var(--text);
-    }
+    .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); background: var(--surface-2); }
 
     .btn-danger {
       background: transparent;
       border-color: var(--red);
       color: var(--red);
     }
-
     .btn-danger:hover { background: var(--red); color: #fff; }
+
+    .btn-low-stock {
+      background: transparent;
+      border-color: var(--border-mid);
+      color: var(--text-muted);
+    }
+    .btn-low-stock.active {
+      background: var(--amber-bg);
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+    .btn-low-stock:hover:not(.active) { border-color: var(--text-muted); color: var(--text); background: var(--surface-2); }
+
+    .badge-count {
+      background: var(--amber);
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 6px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .btn-low-stock:not(.active) .badge-count {
+      background: var(--surface-3);
+      color: var(--text-muted);
+    }
 
     /* ── TABLE ── */
     .table-wrap {
@@ -218,60 +352,116 @@
     }
 
     th {
-      font-family: var(--mono);
       font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
+      font-weight: 600;
+      letter-spacing: 0.10em;
       text-transform: uppercase;
       color: var(--text-dim);
-      padding: 12px 16px;
+      padding: 11px 14px;
       text-align: left;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
       user-select: none;
       white-space: nowrap;
+      transition: color 0.15s;
     }
 
     th:hover { color: var(--text-muted); }
     th.sorted { color: var(--accent); }
+    th:last-child { cursor: default; }
 
-    .sort-arrow { margin-left: 4px; opacity: 0.5; }
+    .sort-arrow { margin-left: 4px; opacity: 0.4; font-size: 10px; }
     th.sorted .sort-arrow { opacity: 1; }
 
     td {
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 12px;
       vertical-align: middle;
+      font-size: 13px;
     }
 
-    tr:hover td { background: var(--surface-2); }
-    tr.selected td { background: #1a1800; }
+    tbody tr { transition: background 0.1s; }
+    tbody tr:hover td { background: var(--surface-2); }
+    tbody tr.selected td { background: var(--surface-3); }
+    tbody tr.low-row td:first-child { border-left: 2px solid var(--red); padding-left: 12px; }
 
     .td-stock {
       font-weight: 500;
       color: var(--text);
-      max-width: 180px;
+      max-width: 200px;
+    }
+
+    .td-stock-name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      display: block;
     }
 
     .td-qty {
-      color: var(--blue);
       text-align: right;
     }
 
-    .td-qty.low { color: var(--red); }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+    }
+
+    .qty-val {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--blue);
+      min-width: 36px;
+      text-align: center;
+    }
+    .qty-val.low { color: var(--red); }
+
+    .qty-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding: 0;
+      transition: all 0.12s;
+      flex-shrink: 0;
+    }
+    .qty-btn:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+    .qty-btn:active { transform: scale(0.92); }
 
     .td-price {
+      font-family: var(--mono);
+      font-size: 12px;
       color: var(--green);
+      text-align: right;
+    }
+
+    .td-value {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
       text-align: right;
     }
 
     .td-vendor {
       color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .td-date {
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 11px;
     }
 
     .td-actions {
@@ -281,32 +471,64 @@
 
     .icon-btn {
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      padding: 4px 8px;
+      padding: 4px 7px;
       color: var(--text-dim);
       font-size: 13px;
-      transition: color 0.15s;
+      transition: all 0.12s;
+    }
+    .icon-btn.edit:hover  { color: var(--accent); background: var(--accent-bg); border-color: var(--accent); }
+    .icon-btn.delete:hover { color: var(--red);    background: var(--red-bg);    border-color: var(--red); }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+    .badge-low { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+
+    /* ── EMPTY / LOADING ── */
+    .state-cell {
+      padding: 80px 32px;
+      text-align: center;
     }
 
-    .icon-btn:hover.edit { color: var(--blue); }
-    .icon-btn:hover.delete { color: var(--red); }
+    .state-icon {
+      font-size: 32px;
+      margin-bottom: 14px;
+      opacity: 0.3;
+    }
 
-    .empty-state {
-      padding: 80px 32px;
+    .state-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .state-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .loading-cell {
+      padding: 48px;
       text-align: center;
       color: var(--text-dim);
       font-family: var(--mono);
-      font-size: 13px;
+      font-size: 12px;
     }
 
-    .empty-state h3 {
-      font-size: 16px;
-      margin-bottom: 8px;
-      color: var(--text-muted);
-    }
-
-    /* ── SIDEBAR PANEL ── */
+    /* ── SIDE PANEL ── */
     .side-panel {
       background: var(--surface);
       display: flex;
@@ -314,211 +536,292 @@
     }
 
     .panel-header {
-      padding: 16px 24px;
+      padding: 14px 20px;
       border-bottom: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
+    .panel-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
     .panel-mode {
+      font-size: 11px;
+      font-weight: 500;
       color: var(--accent);
-      font-size: 10px;
+      font-family: var(--mono);
     }
 
     .form-body {
-      padding: 20px 24px;
+      padding: 18px 20px;
       flex: 1;
       overflow-y: auto;
     }
 
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .form-label {
       display: block;
-      font-family: var(--mono);
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--text-dim);
       margin-bottom: 6px;
     }
 
-    .form-group input, .form-group select {
+    .form-group input,
+    .form-group select {
       width: 100%;
     }
 
     .form-hint {
       margin-top: 4px;
-      font-family: var(--mono);
-      font-size: 10px;
+      font-size: 11px;
       color: var(--text-dim);
     }
 
     .form-error {
-      background: #2a0f0f;
+      background: var(--red-bg);
       border: 1px solid var(--red);
+      border-radius: var(--radius-sm);
       color: var(--red);
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 10px 14px;
-      margin-bottom: 16px;
+      font-size: 12px;
+      padding: 9px 12px;
+      margin-bottom: 14px;
       display: none;
     }
 
-    .form-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--border);
+    .value-preview {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 16px;
       display: flex;
-      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .form-footer .btn { flex: 1; text-align: center; }
+    .value-preview-label {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .value-preview-num {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .item-meta {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 6px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      line-height: 2;
+    }
+
+    .meta-key { color: var(--text-dim); }
+    .meta-val { color: var(--text-muted); font-family: var(--mono); }
+
+    .form-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+    .form-footer .btn { flex: 1; justify-content: center; }
+
+    .kbd-hint {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 8px;
+      padding-bottom: 2px;
+    }
+    .kbd {
+      display: inline-block;
+      background: var(--surface-2);
+      border: 1px solid var(--border-mid);
+      border-radius: 3px;
+      padding: 0 4px;
+      font-family: var(--mono);
+      font-size: 9px;
+    }
 
     /* ── TOAST ── */
     #toast-container {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 22px;
+      right: 22px;
       z-index: 999;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      pointer-events: none;
     }
 
     .toast {
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 12px 18px;
+      font-size: 13px;
+      padding: 11px 16px;
+      border-radius: var(--radius);
       border-left: 3px solid;
       background: var(--surface-2);
+      border-top: 1px solid var(--border-mid);
+      border-right: 1px solid var(--border-mid);
+      border-bottom: 1px solid var(--border-mid);
       color: var(--text);
-      animation: slideIn 0.2s ease;
-      max-width: 320px;
+      box-shadow: var(--shadow);
+      animation: toastIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 300px;
+      pointer-events: all;
     }
 
-    .toast.success { border-color: var(--green); }
-    .toast.error { border-color: var(--red); }
+    .toast.success { border-left-color: var(--green); }
+    .toast.error   { border-left-color: var(--red); }
+    .toast.info    { border-left-color: var(--blue); }
+    .toast.fade-out { animation: toastOut 0.2s ease forwards; }
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(20px); }
-      to { opacity: 1; transform: translateX(0); }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(16px) scale(0.96); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(16px); }
     }
 
     /* ── CONFIRM DIALOG ── */
     .overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.75);
       z-index: 200;
       display: none;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(4px);
     }
-
     .overlay.open { display: flex; }
 
     .dialog {
       background: var(--surface);
-      border: 1px solid var(--border-light);
-      padding: 32px;
-      max-width: 360px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      padding: 28px 28px 24px;
+      max-width: 380px;
       width: 90%;
+      box-shadow: var(--shadow);
+      animation: dialogIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes dialogIn {
+      from { opacity: 0; transform: scale(0.94) translateY(-8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .dialog-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
     }
 
     .dialog h3 {
-      font-family: var(--mono);
-      font-size: 14px;
-      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
       color: var(--text);
     }
 
     .dialog p {
       color: var(--text-muted);
       font-size: 13px;
-      margin-bottom: 24px;
-      line-height: 1.5;
+      margin-bottom: 22px;
+      line-height: 1.6;
     }
 
     .dialog-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       justify-content: flex-end;
-    }
-
-    /* ── BADGE ── */
-    .badge {
-      display: inline-block;
-      font-family: var(--mono);
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 2px 7px;
-      border: 1px solid;
-    }
-
-    .badge-low {
-      color: var(--red);
-      border-color: var(--red);
-      background: rgba(224,90,90,0.08);
-    }
-
-    /* loading */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-dim);
-      font-family: var(--mono);
-      font-size: 12px;
     }
   </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-  <div class="logo">INV<span>/</span>SYS &nbsp;<span>// inventory management</span></div>
-  <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);" id="header-time"></div>
+  <div class="logo">
+    <div class="logo-icon">IN</div>
+    <div class="logo-text">Inventory Manager <span>/ stock control</span></div>
+  </div>
+  <div class="header-right">
+    <div class="header-status">
+      <div class="status-dot"></div>
+      <span>Live</span>
+    </div>
+    <div class="header-time" id="header-time"></div>
+  </div>
 </header>
 
+<!-- STATS BAR -->
 <div class="stats-bar">
   <div class="stat-card">
     <div class="stat-label">Total Items</div>
-    <div class="stat-value" id="stat-items">—</div>
+    <div class="stat-value c-accent" id="stat-items">—</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Total Units</div>
-    <div class="stat-value accent" id="stat-units">—</div>
+    <div class="stat-value c-blue" id="stat-units">—</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Portfolio Value</div>
-    <div class="stat-value green" id="stat-value">—</div>
+    <div class="stat-value c-green" id="stat-value">—</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Vendors</div>
     <div class="stat-value" id="stat-vendors">—</div>
   </div>
+  <div class="stat-card">
+    <div class="stat-label">Low Stock Alerts</div>
+    <div class="stat-value c-amber" id="stat-low">—</div>
+  </div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
+
   <!-- TABLE SECTION -->
-  <div class="table-section">
+  <div class="content-area">
     <div class="toolbar">
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
-        <input class="search-input" type="text" id="search" placeholder="Search stock or vendor…" />
+        <input class="search-input" type="text" id="search" placeholder="Search items or vendors…" autocomplete="off" />
       </div>
       <select id="filter-vendor">
         <option value="">All Vendors</option>
       </select>
+      <button class="btn btn-low-stock" id="btn-low-stock" title="Show only low stock items">
+        ⚠ Low Stock <span class="badge-count" id="low-stock-badge">0</span>
+      </button>
+      <div class="toolbar-divider"></div>
+      <span class="item-count" id="item-count"></span>
+      <a class="btn btn-ghost" href="/api/inventory/export" download title="Download all items as CSV">
+        ↓ Export CSV
+      </a>
       <button class="btn btn-primary" id="btn-new">+ New Item</button>
     </div>
 
@@ -526,16 +829,17 @@
       <table>
         <thead>
           <tr>
-            <th data-col="stock">Stock <span class="sort-arrow">↕</span></th>
-            <th data-col="quantity" style="text-align:right">Qty <span class="sort-arrow">↕</span></th>
-            <th data-col="price" style="text-align:right">Price <span class="sort-arrow">↕</span></th>
+            <th data-col="stock">Stock Name <span class="sort-arrow">↕</span></th>
+            <th data-col="quantity" style="text-align:right">Quantity <span class="sort-arrow">↕</span></th>
+            <th data-col="price" style="text-align:right">Unit Price <span class="sort-arrow">↕</span></th>
+            <th style="text-align:right; cursor:default">Total Value</th>
             <th data-col="vendor">Vendor <span class="sort-arrow">↕</span></th>
-            <th data-col="updated_at">Updated <span class="sort-arrow">↕</span></th>
-            <th></th>
+            <th data-col="updated_at">Last Updated <span class="sort-arrow">↕</span></th>
+            <th style="cursor:default; text-align:right">Actions</th>
           </tr>
         </thead>
         <tbody id="table-body">
-          <tr><td colspan="6" class="loading">Loading inventory…</td></tr>
+          <tr><td colspan="7" class="loading-cell">Loading inventory…</td></tr>
         </tbody>
       </table>
     </div>
@@ -544,20 +848,20 @@
   <!-- SIDE PANEL -->
   <div class="side-panel">
     <div class="panel-header">
-      <span>Item Details</span>
-      <span class="panel-mode" id="panel-mode">— SELECT OR CREATE</span>
+      <span class="panel-title">Item Details</span>
+      <span class="panel-mode" id="panel-mode">NEW ITEM</span>
     </div>
     <div class="form-body">
       <div class="form-error" id="form-error"></div>
 
       <div class="form-group">
         <label class="form-label" for="f-stock">Stock Name</label>
-        <input type="text" id="f-stock" placeholder="e.g. USB-C Cable 2m" />
+        <input type="text" id="f-stock" placeholder="e.g. USB-C Cable 2m" autocomplete="off" />
       </div>
       <div class="form-group">
         <label class="form-label" for="f-quantity">Quantity</label>
-        <input type="number" id="f-quantity" min="0" placeholder="0" />
-        <div class="form-hint">Items in stock</div>
+        <input type="number" id="f-quantity" min="0" step="1" placeholder="0" />
+        <div class="form-hint">Units currently in stock</div>
       </div>
       <div class="form-group">
         <label class="form-label" for="f-price">Unit Price ($)</label>
@@ -565,27 +869,35 @@
       </div>
       <div class="form-group">
         <label class="form-label" for="f-vendor">Vendor</label>
-        <input type="text" id="f-vendor" placeholder="e.g. Acme Supplies" />
+        <input type="text" id="f-vendor" placeholder="e.g. Acme Supplies" autocomplete="off" />
       </div>
 
-      <div id="item-meta" style="display:none;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);line-height:2">
-          <div>ID: <span id="meta-id" style="color:var(--text-muted)"></span></div>
-          <div>Created: <span id="meta-created" style="color:var(--text-muted)"></span></div>
-          <div>Updated: <span id="meta-updated" style="color:var(--text-muted)"></span></div>
-        </div>
+      <div class="value-preview">
+        <span class="value-preview-label">Total line value</span>
+        <span class="value-preview-num" id="value-preview">$0.00</span>
+      </div>
+
+      <div class="item-meta" id="item-meta" style="display:none">
+        <div class="meta-row"><span class="meta-key">Item ID</span><span class="meta-val" id="meta-id"></span></div>
+        <div class="meta-row"><span class="meta-key">Created</span><span class="meta-val" id="meta-created"></span></div>
+        <div class="meta-row"><span class="meta-key">Updated</span><span class="meta-val" id="meta-updated"></span></div>
       </div>
     </div>
     <div class="form-footer">
       <button class="btn btn-ghost" id="btn-cancel">Clear</button>
       <button class="btn btn-primary" id="btn-save">Save Item</button>
     </div>
+    <div class="kbd-hint">
+      <kbd class="kbd">Ctrl+S</kbd> save &nbsp;·&nbsp; <kbd class="kbd">Esc</kbd> cancel
+    </div>
   </div>
-</div>
 
-<!-- CONFIRM DIALOG -->
+</div><!-- /.main -->
+
+<!-- DELETE DIALOG -->
 <div class="overlay" id="confirm-overlay">
   <div class="dialog">
+    <div class="dialog-icon">🗑</div>
     <h3>Delete Item</h3>
     <p id="confirm-text">Are you sure you want to delete this item? This action cannot be undone.</p>
     <div class="dialog-actions">
@@ -600,13 +912,16 @@
 
 <script>
   const API = '/api';
-  let sortCol = 'stock';
+  let sortCol   = 'stock';
   let sortOrder = 'asc';
   let editingId = null;
   let deleteTargetId = null;
-  let allItems = [];
+  let allItems  = [];
+  let lowStockCount = 0;
+  let showLowStockOnly = false;
+  let searchTimer;
 
-  // ── TIME ──
+  // ── CLOCK ──
   function updateTime() {
     const now = new Date();
     document.getElementById('header-time').textContent =
@@ -615,37 +930,69 @@
   updateTime();
   setInterval(updateTime, 1000);
 
+  // ── HELPERS ──
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function fmtDate(dt) {
+    if (!dt) return '—';
+    return new Date(dt + 'Z').toLocaleString('en-CA', {
+      month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+  }
+
+  function fmtCurrency(n) {
+    return '$' + Number(n).toLocaleString('en', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+  }
+
   // ── TOAST ──
   function toast(msg, type = 'success') {
     const el = document.createElement('div');
     el.className = `toast ${type}`;
     el.textContent = msg;
     document.getElementById('toast-container').appendChild(el);
-    setTimeout(() => el.remove(), 3000);
+    setTimeout(() => {
+      el.classList.add('fade-out');
+      el.addEventListener('animationend', () => el.remove());
+    }, 3000);
   }
 
   // ── STATS ──
   async function loadStats() {
-    const res = await fetch(`${API}/stats`);
-    const { data } = await res.json();
-    document.getElementById('stat-items').textContent = data.total_items;
-    document.getElementById('stat-units').textContent = Number(data.total_units).toLocaleString();
-    document.getElementById('stat-value').textContent = '$' + Number(data.total_value).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('stat-vendors').textContent = data.total_vendors;
+    try {
+      const res = await fetch(`${API}/stats`);
+      const { data } = await res.json();
+      document.getElementById('stat-items').textContent   = Number(data.total_items).toLocaleString();
+      document.getElementById('stat-units').textContent   = Number(data.total_units).toLocaleString();
+      document.getElementById('stat-value').textContent   = fmtCurrency(data.total_value);
+      document.getElementById('stat-vendors').textContent = Number(data.total_vendors).toLocaleString();
+      lowStockCount = Number(data.low_stock_count) || 0;
+      document.getElementById('stat-low').textContent     = lowStockCount;
+      document.getElementById('low-stock-badge').textContent = lowStockCount;
+    } catch (_) {}
   }
 
-  // ── VENDORS FILTER ──
+  // ── VENDORS ──
   async function loadVendors() {
-    const res = await fetch(`${API}/vendors`);
-    const { data } = await res.json();
-    const sel = document.getElementById('filter-vendor');
-    // keep first option
-    sel.innerHTML = '<option value="">All Vendors</option>';
-    data.forEach(v => {
-      const o = document.createElement('option');
-      o.value = v; o.textContent = v;
-      sel.appendChild(o);
-    });
+    try {
+      const res = await fetch(`${API}/vendors`);
+      const { data } = await res.json();
+      const sel = document.getElementById('filter-vendor');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">All Vendors</option>';
+      data.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        if (v === cur) o.selected = true;
+        sel.appendChild(o);
+      });
+    } catch (_) {}
   }
 
   // ── LOAD ITEMS ──
@@ -655,55 +1002,82 @@
     const params = new URLSearchParams({ sort: sortCol, order: sortOrder });
     if (search) params.set('search', search);
     if (vendor) params.set('vendor', vendor);
+    if (showLowStockOnly) params.set('low_stock', '1');
 
-    const res = await fetch(`${API}/inventory?${params}`);
-    const { data } = await res.json();
-    allItems = data;
-    renderTable(data);
-    loadStats();
-    loadVendors();
+    try {
+      const res = await fetch(`${API}/inventory?${params}`);
+      const { data } = await res.json();
+      allItems = data;
+      renderTable(data);
+      loadStats();
+      loadVendors();
+    } catch (err) {
+      document.getElementById('table-body').innerHTML =
+        `<tr><td colspan="7" class="state-cell">
+          <div class="state-icon">⚡</div>
+          <div class="state-title">Connection error</div>
+          <div class="state-sub">Could not reach the server. Is it running?</div>
+        </td></tr>`;
+    }
   }
 
-  function fmtDate(dt) {
-    if (!dt) return '—';
-    return new Date(dt + 'Z').toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-  }
-
+  // ── RENDER TABLE ──
   function renderTable(items) {
     const tbody = document.getElementById('table-body');
-    // update sort headers
+
     document.querySelectorAll('th[data-col]').forEach(th => {
       th.classList.toggle('sorted', th.dataset.col === sortCol);
       const arrow = th.querySelector('.sort-arrow');
-      if (arrow) arrow.textContent = th.dataset.col === sortCol ? (sortOrder === 'asc' ? '↑' : '↓') : '↕';
+      if (arrow) {
+        arrow.textContent = th.dataset.col === sortCol
+          ? (sortOrder === 'asc' ? '↑' : '↓')
+          : '↕';
+      }
     });
 
+    const total = allItems.length;
+    document.getElementById('item-count').textContent =
+      items.length === total
+        ? `${total} item${total !== 1 ? 's' : ''}`
+        : `${items.length} of ${total} items`;
+
     if (!items.length) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
-        <h3>No items found</h3>
-        <p>Create your first inventory item using the panel →</p>
+      const empty = showLowStockOnly
+        ? ['✓', 'No low stock items', 'All items are well stocked.']
+        : ['📦', 'No items found', 'Create your first item using the panel →'];
+      tbody.innerHTML = `<tr><td colspan="7" class="state-cell">
+        <div class="state-icon">${empty[0]}</div>
+        <div class="state-title">${empty[1]}</div>
+        <div class="state-sub">${empty[2]}</div>
       </td></tr>`;
       return;
     }
 
     tbody.innerHTML = items.map(item => {
-      const lowStock = item.quantity <= 5;
-      return `<tr data-id="${item.id}" class="${editingId == item.id ? 'selected' : ''}">
-        <td class="td-stock">${escHtml(item.stock)}${lowStock ? ' <span class="badge badge-low">LOW</span>' : ''}</td>
-        <td class="td-qty ${lowStock ? 'low' : ''}">${item.quantity.toLocaleString()}</td>
-        <td class="td-price">$${Number(item.price).toFixed(2)}</td>
+      const low = item.quantity <= 5;
+      const lineVal = item.quantity * item.price;
+      return `<tr data-id="${item.id}" class="${editingId == item.id ? 'selected' : ''}${low ? ' low-row' : ''}">
+        <td class="td-stock">
+          <span class="td-stock-name">${escHtml(item.stock)}</span>
+          ${low ? '<span class="badge badge-low">Low</span>' : ''}
+        </td>
+        <td class="td-qty">
+          <div class="qty-control">
+            <button class="qty-btn" data-id="${item.id}" data-delta="-1" title="Decrease quantity">−</button>
+            <span class="qty-val${low ? ' low' : ''}">${Number(item.quantity).toLocaleString()}</span>
+            <button class="qty-btn" data-id="${item.id}" data-delta="1" title="Increase quantity">+</button>
+          </div>
+        </td>
+        <td class="td-price">${fmtCurrency(item.price)}</td>
+        <td class="td-value">${fmtCurrency(lineVal)}</td>
         <td class="td-vendor">${escHtml(item.vendor)}</td>
-        <td style="color:var(--text-dim);font-size:11px">${fmtDate(item.updated_at)}</td>
+        <td class="td-date">${fmtDate(item.updated_at)}</td>
         <td class="td-actions">
-          <button class="icon-btn edit" onclick="startEdit(${item.id})" title="Edit">✎</button>
-          <button class="icon-btn delete" onclick="confirmDelete(${item.id}, '${escHtml(item.stock)}')" title="Delete">✕</button>
+          <button class="icon-btn edit"   onclick="startEdit(${item.id})"                         title="Edit item">✎</button>
+          <button class="icon-btn delete" onclick="confirmDelete(${item.id},'${escHtml(item.stock)}')" title="Delete item">✕</button>
         </td>
       </tr>`;
     }).join('');
-  }
-
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   // ── SORT ──
@@ -720,24 +1094,64 @@
   });
 
   // ── SEARCH / FILTER ──
-  let searchTimer;
   document.getElementById('search').addEventListener('input', () => {
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(loadItems, 250);
+    searchTimer = setTimeout(loadItems, 260);
   });
   document.getElementById('filter-vendor').addEventListener('change', loadItems);
+
+  // ── LOW STOCK TOGGLE ──
+  document.getElementById('btn-low-stock').addEventListener('click', () => {
+    showLowStockOnly = !showLowStockOnly;
+    document.getElementById('btn-low-stock').classList.toggle('active', showLowStockOnly);
+    loadItems();
+  });
+
+  // ── QUICK QUANTITY ADJUST ──
+  document.getElementById('table-body').addEventListener('click', async e => {
+    const btn = e.target.closest('.qty-btn');
+    if (!btn) return;
+    const id    = Number(btn.dataset.id);
+    const delta = Number(btn.dataset.delta);
+    const item  = allItems.find(i => i.id === id);
+    if (!item) return;
+    const newQty = item.quantity + delta;
+    if (newQty < 0) return;
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/inventory/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: newQty })
+      });
+      if (!res.ok) { const j = await res.json(); toast(j.error || 'Update failed', 'error'); }
+      else { loadItems(); }
+    } catch (_) {
+      toast('Network error', 'error');
+    }
+    btn.disabled = false;
+  });
+
+  // ── VALUE PREVIEW ──
+  function updateValuePreview() {
+    const qty   = Number(document.getElementById('f-quantity').value) || 0;
+    const price = Number(document.getElementById('f-price').value)    || 0;
+    document.getElementById('value-preview').textContent = fmtCurrency(qty * price);
+  }
+  document.getElementById('f-quantity').addEventListener('input', updateValuePreview);
+  document.getElementById('f-price').addEventListener('input', updateValuePreview);
 
   // ── FORM ──
   function clearForm() {
     editingId = null;
-    document.getElementById('f-stock').value = '';
-    document.getElementById('f-quantity').value = '';
-    document.getElementById('f-price').value = '';
-    document.getElementById('f-vendor').value = '';
+    ['f-stock','f-quantity','f-price','f-vendor'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
     document.getElementById('form-error').style.display = 'none';
-    document.getElementById('item-meta').style.display = 'none';
-    document.getElementById('panel-mode').textContent = '— NEW ITEM';
-    document.getElementById('btn-save').textContent = 'Save Item';
+    document.getElementById('item-meta').style.display  = 'none';
+    document.getElementById('panel-mode').textContent   = 'NEW ITEM';
+    document.getElementById('btn-save').textContent     = 'Save Item';
+    updateValuePreview();
     renderTable(allItems);
   }
 
@@ -745,17 +1159,18 @@
     const item = allItems.find(i => i.id == id);
     if (!item) return;
     editingId = id;
-    document.getElementById('f-stock').value = item.stock;
+    document.getElementById('f-stock').value    = item.stock;
     document.getElementById('f-quantity').value = item.quantity;
-    document.getElementById('f-price').value = Number(item.price).toFixed(2);
-    document.getElementById('f-vendor').value = item.vendor;
+    document.getElementById('f-price').value    = Number(item.price).toFixed(2);
+    document.getElementById('f-vendor').value   = item.vendor;
     document.getElementById('form-error').style.display = 'none';
-    document.getElementById('panel-mode').textContent = `— EDITING #${id}`;
-    document.getElementById('btn-save').textContent = 'Update Item';
-    document.getElementById('item-meta').style.display = 'block';
-    document.getElementById('meta-id').textContent = item.id;
+    document.getElementById('panel-mode').textContent   = `EDITING #${id}`;
+    document.getElementById('btn-save').textContent     = 'Update Item';
+    document.getElementById('item-meta').style.display  = 'block';
+    document.getElementById('meta-id').textContent      = item.id;
     document.getElementById('meta-created').textContent = fmtDate(item.created_at);
     document.getElementById('meta-updated').textContent = fmtDate(item.updated_at);
+    updateValuePreview();
     renderTable(allItems);
     document.getElementById('f-stock').focus();
   }
@@ -773,46 +1188,46 @@
 
   document.getElementById('btn-cancel').addEventListener('click', clearForm);
 
-  document.getElementById('btn-save').addEventListener('click', async () => {
+  async function saveItem() {
     document.getElementById('form-error').style.display = 'none';
-    const stock = document.getElementById('f-stock').value.trim();
+    const stock    = document.getElementById('f-stock').value.trim();
     const quantity = document.getElementById('f-quantity').value;
-    const price = document.getElementById('f-price').value;
-    const vendor = document.getElementById('f-vendor').value.trim();
+    const price    = document.getElementById('f-price').value;
+    const vendor   = document.getElementById('f-vendor').value.trim();
 
-    if (!stock) return showError('Stock name is required.');
-    if (quantity === '') return showError('Quantity is required.');
-    if (price === '') return showError('Price is required.');
-    if (!vendor) return showError('Vendor is required.');
+    if (!stock)          return showError('Stock name is required.');
+    if (quantity === '')  return showError('Quantity is required.');
+    if (price === '')     return showError('Price is required.');
+    if (!vendor)         return showError('Vendor is required.');
     if (Number(quantity) < 0) return showError('Quantity cannot be negative.');
-    if (Number(price) < 0) return showError('Price cannot be negative.');
+    if (Number(price)    < 0) return showError('Price cannot be negative.');
 
     const body = { stock, quantity: Number(quantity), price: Number(price), vendor };
+    const btn  = document.getElementById('btn-save');
+    btn.disabled = true;
 
     try {
-      let res;
-      if (editingId) {
-        res = await fetch(`${API}/inventory/${editingId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-      } else {
-        res = await fetch(`${API}/inventory`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-      }
+      const res = editingId
+        ? await fetch(`${API}/inventory/${editingId}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          })
+        : await fetch(`${API}/inventory`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          });
+
       const json = await res.json();
       if (!res.ok) return showError(json.error || 'Request failed');
-      toast(editingId ? `Updated "${stock}"` : `Created "${stock}"`);
+      toast(editingId ? `Updated "${stock}"` : `Added "${stock}"`);
       clearForm();
       loadItems();
-    } catch (err) {
+    } catch (_) {
       showError('Network error. Is the server running?');
+    } finally {
+      btn.disabled = false;
     }
-  });
+  }
+
+  document.getElementById('btn-save').addEventListener('click', saveItem);
 
   // ── DELETE ──
   function confirmDelete(id, name) {
@@ -831,15 +1246,41 @@
     if (!deleteTargetId) return;
     document.getElementById('confirm-overlay').classList.remove('open');
     try {
-      const res = await fetch(`${API}/inventory/${deleteTargetId}`, { method: 'DELETE' });
+      const res  = await fetch(`${API}/inventory/${deleteTargetId}`, { method: 'DELETE' });
       const json = await res.json();
       if (!res.ok) return toast(json.error || 'Delete failed', 'error');
-      toast('Item deleted');
+      toast('Item deleted', 'info');
       if (editingId == deleteTargetId) clearForm();
       deleteTargetId = null;
       loadItems();
-    } catch (err) {
+    } catch (_) {
       toast('Network error', 'error');
+    }
+  });
+
+  // close dialog on overlay click
+  document.getElementById('confirm-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) {
+      document.getElementById('confirm-overlay').classList.remove('open');
+      deleteTargetId = null;
+    }
+  });
+
+  // ── KEYBOARD SHORTCUTS ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('confirm-overlay').classList.contains('open')) {
+        document.getElementById('confirm-overlay').classList.remove('open');
+        deleteTargetId = null;
+      } else if (editingId) {
+        clearForm();
+      }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      const stock = document.getElementById('f-stock').value.trim();
+      const qty   = document.getElementById('f-quantity').value;
+      if (stock || qty) saveItem();
     }
   });
 
