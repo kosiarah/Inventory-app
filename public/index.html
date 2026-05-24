@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #161616;
+      --surface-2: #1e1e1e;
+      --border: #2a2a2a;
+      --border-light: #333;
+      --text: #e8e8e8;
+      --text-muted: #888;
+      --text-dim: #555;
+      --accent: #f0c040;
+      --accent-dim: #b89020;
+      --green: #4caf78;
+      --red: #e05a5a;
+      --blue: #5a9ee0;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .logo span {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-card {
+      padding: 20px 32px;
+      border-right: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .stat-card:last-child { border-right: none; }
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.green { color: var(--green); }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      min-height: calc(100vh - 56px - 65px);
+    }
+
+    /* ── TABLE SECTION ── */
+    .table-section {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    input[type="text"], input[type="number"], select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    .search-input {
+      width: 100%;
+      padding-left: 34px;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover { background: #ffd060; border-color: #ffd060; }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border-light);
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .btn-danger:hover { background: var(--red); color: #fff; }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      overflow: auto;
+      flex: 1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    th:hover { color: var(--text-muted); }
+    th.sorted { color: var(--accent); }
+
+    .sort-arrow { margin-left: 4px; opacity: 0.5; }
+    th.sorted .sort-arrow { opacity: 1; }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    tr:hover td { background: var(--surface-2); }
+    tr.selected td { background: #1a1800; }
+
+    .td-stock {
+      font-weight: 500;
+      color: var(--text);
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .td-qty {
+      color: var(--blue);
+      text-align: right;
+    }
+
+    .td-qty.low { color: var(--red); }
+
+    .td-price {
+      color: var(--green);
+      text-align: right;
+    }
+
+    .td-vendor {
+      color: var(--text-muted);
+    }
+
+    .td-actions {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      color: var(--text-dim);
+      font-size: 13px;
+      transition: color 0.15s;
+    }
+
+    .icon-btn:hover.edit { color: var(--blue); }
+    .icon-btn:hover.delete { color: var(--red); }
+
+    .empty-state {
+      padding: 80px 32px;
+      text-align: center;
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .empty-state h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+    }
+
+    /* ── SIDEBAR PANEL ── */
+    .side-panel {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-mode {
+      color: var(--accent);
+      font-size: 10px;
+    }
+
+    .form-body {
+      padding: 20px 24px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+    }
+
+    .form-hint {
+      margin-top: 4px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .form-error {
+      background: #2a0f0f;
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .form-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-footer .btn { flex: 1; text-align: center; }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 12px 18px;
+      border-left: 3px solid;
+      background: var(--surface-2);
+      color: var(--text);
+      animation: slideIn 0.2s ease;
+      max-width: 320px;
+    }
+
+    .toast.success { border-color: var(--green); }
+    .toast.error { border-color: var(--red); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── CONFIRM DIALOG ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .overlay.open { display: flex; }
+
+    .dialog {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      padding: 32px;
+      max-width: 360px;
+      width: 90%;
+    }
+
+    .dialog h3 {
+      font-family: var(--mono);
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .dialog p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border: 1px solid;
+    }
+
+    .badge-low {
+      color: var(--red);
+      border-color: var(--red);
+      background: rgba(224,90,90,0.08);
+    }
+
+    /* loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">INV<span>/</span>SYS &nbsp;<span>// inventory management</span></div>
+  <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);" id="header-time"></div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="stat-label">Total Items</div>
+    <div class="stat-value" id="stat-items">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Units</div>
+    <div class="stat-value accent" id="stat-units">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Portfolio Value</div>
+    <div class="stat-value green" id="stat-value">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Vendors</div>
+    <div class="stat-value" id="stat-vendors">—</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- TABLE SECTION -->
+  <div class="table-section">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" type="text" id="search" placeholder="Search stock or vendor…" />
+      </div>
+      <select id="filter-vendor">
+        <option value="">All Vendors</option>
+      </select>
+      <button class="btn btn-primary" id="btn-new">+ New Item</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="stock">Stock <span class="sort-arrow">↕</span></th>
+            <th data-col="quantity" style="text-align:right">Qty <span class="sort-arrow">↕</span></th>
+            <th data-col="price" style="text-align:right">Price <span class="sort-arrow">↕</span></th>
+            <th data-col="vendor">Vendor <span class="sort-arrow">↕</span></th>
+            <th data-col="updated_at">Updated <span class="sort-arrow">↕</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="6" class="loading">Loading inventory…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel">
+    <div class="panel-header">
+      <span>Item Details</span>
+      <span class="panel-mode" id="panel-mode">— SELECT OR CREATE</span>
+    </div>
+    <div class="form-body">
+      <div class="form-error" id="form-error"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="f-stock">Stock Name</label>
+        <input type="text" id="f-stock" placeholder="e.g. USB-C Cable 2m" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-quantity">Quantity</label>
+        <input type="number" id="f-quantity" min="0" placeholder="0" />
+        <div class="form-hint">Items in stock</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-price">Unit Price ($)</label>
+        <input type="number" id="f-price" min="0" step="0.01" placeholder="0.00" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-vendor">Vendor</label>
+        <input type="text" id="f-vendor" placeholder="e.g. Acme Supplies" />
+      </div>
+
+      <div id="item-meta" style="display:none;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);line-height:2">
+          <div>ID: <span id="meta-id" style="color:var(--text-muted)"></span></div>
+          <div>Created: <span id="meta-created" style="color:var(--text-muted)"></span></div>
+          <div>Updated: <span id="meta-updated" style="color:var(--text-muted)"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" id="btn-cancel">Clear</button>
+      <button class="btn btn-primary" id="btn-save">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="overlay" id="confirm-overlay">
+  <div class="dialog">
+    <h3>Delete Item</h3>
+    <p id="confirm-text">Are you sure you want to delete this item? This action cannot be undone.</p>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" id="btn-cancel-delete">Cancel</button>
+      <button class="btn btn-danger" id="btn-confirm-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<script>
+  const API = '/api';
+  let sortCol = 'stock';
+  let sortOrder = 'asc';
+  let editingId = null;
+  let deleteTargetId = null;
+  let allItems = [];
+
+  // ── TIME ──
+  function updateTime() {
+    const now = new Date();
+    document.getElementById('header-time').textContent =
+      now.toLocaleString('en-CA', { hour12: false });
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  // ── TOAST ──
+  function toast(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  // ── STATS ──
+  async function loadStats() {
+    const res = await fetch(`${API}/stats`);
+    const { data } = await res.json();
+    document.getElementById('stat-items').textContent = data.total_items;
+    document.getElementById('stat-units').textContent = Number(data.total_units).toLocaleString();
+    document.getElementById('stat-value').textContent = '$' + Number(data.total_value).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('stat-vendors').textContent = data.total_vendors;
+  }
+
+  // ── VENDORS FILTER ──
+  async function loadVendors() {
+    const res = await fetch(`${API}/vendors`);
+    const { data } = await res.json();
+    const sel = document.getElementById('filter-vendor');
+    // keep first option
+    sel.innerHTML = '<option value="">All Vendors</option>';
+    data.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      sel.appendChild(o);
+    });
+  }
+
+  // ── LOAD ITEMS ──
+  async function loadItems() {
+    const search = document.getElementById('search').value;
+    const vendor = document.getElementById('filter-vendor').value;
+    const params = new URLSearchParams({ sort: sortCol, order: sortOrder });
+    if (search) params.set('search', search);
+    if (vendor) params.set('vendor', vendor);
+
+    const res = await fetch(`${API}/inventory?${params}`);
+    const { data } = await res.json();
+    allItems = data;
+    renderTable(data);
+    loadStats();
+    loadVendors();
+  }
+
+  function fmtDate(dt) {
+    if (!dt) return '—';
+    return new Date(dt + 'Z').toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+
+  function renderTable(items) {
+    const tbody = document.getElementById('table-body');
+    // update sort headers
+    document.querySelectorAll('th[data-col]').forEach(th => {
+      th.classList.toggle('sorted', th.dataset.col === sortCol);
+      const arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.textContent = th.dataset.col === sortCol ? (sortOrder === 'asc' ? '↑' : '↓') : '↕';
+    });
+
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+        <h3>No items found</h3>
+        <p>Create your first inventory item using the panel →</p>
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = items.map(item => {
+      const lowStock = item.quantity <= 5;
+      return `<tr data-id="${item.id}" class="${editingId == item.id ? 'selected' : ''}">
+        <td class="td-stock">${escHtml(item.stock)}${lowStock ? ' <span class="badge badge-low">LOW</span>' : ''}</td>
+        <td class="td-qty ${lowStock ? 'low' : ''}">${item.quantity.toLocaleString()}</td>
+        <td class="td-price">$${Number(item.price).toFixed(2)}</td>
+        <td class="td-vendor">${escHtml(item.vendor)}</td>
+        <td style="color:var(--text-dim);font-size:11px">${fmtDate(item.updated_at)}</td>
+        <td class="td-actions">
+          <button class="icon-btn edit" onclick="startEdit(${item.id})" title="Edit">✎</button>
+          <button class="icon-btn delete" onclick="confirmDelete(${item.id}, '${escHtml(item.stock)}')" title="Delete">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── SORT ──
+  document.querySelectorAll('th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      if (sortCol === th.dataset.col) {
+        sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortCol = th.dataset.col;
+        sortOrder = 'asc';
+      }
+      loadItems();
+    });
+  });
+
+  // ── SEARCH / FILTER ──
+  let searchTimer;
+  document.getElementById('search').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadItems, 250);
+  });
+  document.getElementById('filter-vendor').addEventListener('change', loadItems);
+
+  // ── FORM ──
+  function clearForm() {
+    editingId = null;
+    document.getElementById('f-stock').value = '';
+    document.getElementById('f-quantity').value = '';
+    document.getElementById('f-price').value = '';
+    document.getElementById('f-vendor').value = '';
+    document.getElementById('form-error').style.display = 'none';
+    document.getElementById('item-meta').style.display = 'none';
+    document.getElementById('panel-mode').textContent = '— NEW ITEM';
+    document.getElementById('btn-save').textContent = 'Save Item';
+    renderTable(allItems);
+  }
+
+  function startEdit(id) {
+    const item = allItems.find(i => i.id == id);
+    if (!item) return;
+    editingId = id;
+    document.getElementById('f-stock').value = item.stock;
+    document.getElementById('f-quantity').value = item.quantity;
+    document.getElementById('f-price').value = Number(item.price).toFixed(2);
+    document.getElementById('f-vendor').value = item.vendor;
+    document.getElementById('form-error').style.display = 'none';
+    document.getElementById('panel-mode').textContent = `— EDITING #${id}`;
+    document.getElementById('btn-save').textContent = 'Update Item';
+    document.getElementById('item-meta').style.display = 'block';
+    document.getElementById('meta-id').textContent = item.id;
+    document.getElementById('meta-created').textContent = fmtDate(item.created_at);
+    document.getElementById('meta-updated').textContent = fmtDate(item.updated_at);
+    renderTable(allItems);
+    document.getElementById('f-stock').focus();
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('form-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  document.getElementById('btn-new').addEventListener('click', () => {
+    clearForm();
+    document.getElementById('f-stock').focus();
+  });
+
+  document.getElementById('btn-cancel').addEventListener('click', clearForm);
+
+  document.getElementById('btn-save').addEventListener('click', async () => {
+    document.getElementById('form-error').style.display = 'none';
+    const stock = document.getElementById('f-stock').value.trim();
+    const quantity = document.getElementById('f-quantity').value;
+    const price = document.getElementById('f-price').value;
+    const vendor = document.getElementById('f-vendor').value.trim();
+
+    if (!stock) return showError('Stock name is required.');
+    if (quantity === '') return showError('Quantity is required.');
+    if (price === '') return showError('Price is required.');
+    if (!vendor) return showError('Vendor is required.');
+    if (Number(quantity) < 0) return showError('Quantity cannot be negative.');
+    if (Number(price) < 0) return showError('Price cannot be negative.');
+
+    const body = { stock, quantity: Number(quantity), price: Number(price), vendor };
+
+    try {
+      let res;
+      if (editingId) {
+        res = await fetch(`${API}/inventory/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } else {
+        res = await fetch(`${API}/inventory`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      }
+      const json = await res.json();
+      if (!res.ok) return showError(json.error || 'Request failed');
+      toast(editingId ? `Updated "${stock}"` : `Created "${stock}"`);
+      clearForm();
+      loadItems();
+    } catch (err) {
+      showError('Network error. Is the server running?');
+    }
+  });
+
+  // ── DELETE ──
+  function confirmDelete(id, name) {
+    deleteTargetId = id;
+    document.getElementById('confirm-text').textContent =
+      `Delete "${name}"? This cannot be undone.`;
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+
+  document.getElementById('btn-cancel-delete').addEventListener('click', () => {
+    document.getElementById('confirm-overlay').classList.remove('open');
+    deleteTargetId = null;
+  });
+
+  document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+    if (!deleteTargetId) return;
+    document.getElementById('confirm-overlay').classList.remove('open');
+    try {
+      const res = await fetch(`${API}/inventory/${deleteTargetId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok) return toast(json.error || 'Delete failed', 'error');
+      toast('Item deleted');
+      if (editingId == deleteTargetId) clearForm();
+      deleteTargetId = null;
+      loadItems();
+    } catch (err) {
+      toast('Network error', 'error');
+    }
+  });
+
+  // ── INIT ──
+  loadItems();
+</script>
+</body>
+</html>
